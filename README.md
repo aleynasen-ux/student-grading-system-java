@@ -1,22 +1,18 @@
-
-# Student Grading System
+# Student Grading System (Java)
 
 ## Description
-This project is a desktop-based student grading system developed using Java. It allows management of students, courses, grades, and attendance.
+This project is a desktop-based student grading system developed using Java. It manages students, courses, grades, and attendance.
 
 ## Features
 - Student management
 - Course management
 - Grade tracking
 - Attendance tracking
-- Database connection (DBConnection)
 
 ## Technologies
 - Java
-- MySQL
-- NetBeans GUI
+- File-based storage (.dat files)
 
-## Structure
-- Student, Course, Grades, Attendance classes
-- Management panels (GUI forms)
-- Database integration
+## How to Run
+- Open project in NetBeans
+- Run main class
