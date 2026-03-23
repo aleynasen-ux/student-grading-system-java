@@ -1,0 +1,84 @@
+package studentgradingsystemaleyna;
+
+import java.io.Serializable;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Attendance implements Serializable {
+
+    private int att_id;
+    private int std_id;
+    private int crs_id;
+    private String att_date;
+
+    public Attendance(int att_id, int std_id, int crs_id, String att_date) {
+        this.att_id = att_id;
+        this.std_id = std_id;
+        this.crs_id = crs_id;
+        this.att_date = att_date;
+    }
+
+    public int getAtt_id() { return att_id; }
+    public int getStd_id() { return std_id; }
+    public int getCrs_id() { return crs_id; }
+    public String getAtt_date() { return att_date; }
+
+   public static void addAttendanceDB(int stdId, int crsId, String date) {
+    String sql =
+      "INSERT INTO attendance(std_id, course_id, attendance_date, status) VALUES (?,?,?,?)";
+
+    try (Connection con = DBConnection.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+
+        ps.setInt(1, stdId);
+        ps.setInt(2, crsId);
+        ps.setString(3, date);
+        ps.setString(4, "Present"); 
+
+        ps.executeUpdate();
+
+    } catch (Exception e) {
+        e.printStackTrace(); 
+    }
+}
+
+   
+    public static List<Attendance> getAllAttendanceDB() {
+        List<Attendance> list = new ArrayList<>();
+        String sql = "SELECT * FROM attendance";
+
+        try (Connection con = DBConnection.getConnection();
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+
+            while (rs.next()) {
+                list.add(new Attendance(
+                        rs.getInt("attendance_id"),
+                        rs.getInt("std_id"),
+                        rs.getInt("course_id"),
+                        rs.getString("attendance_date")
+                ));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+
+    public static void deleteAttendanceDB(int id) {
+        String sql = "DELETE FROM attendance WHERE attendance_id=?";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+

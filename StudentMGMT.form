@@ -1,0 +1,118 @@
+package studentgradingsystemaleyna;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Grades {
+
+    private int gradeId;
+    private int studentId;
+    private int courseId;
+    private double midterm;
+    private double fin;
+    private double average;
+    private String letter;
+
+    public Grades(int gradeId, int studentId, int courseId,
+                  double midterm, double fin, double average, String letter) {
+        this.gradeId = gradeId;
+        this.studentId = studentId;
+        this.courseId = courseId;
+        this.midterm = midterm;
+        this.fin = fin;
+        this.average = average;
+        this.letter = letter;
+    }
+
+    // GETTERS
+    public int getGradeId() { return gradeId; }
+    public int getStudentId() { return studentId; }
+    public int getCourseId() { return courseId; }
+    public double getMidterm() { return midterm; }
+    public double getFin() { return fin; }
+    public double getAverage() { return average; }
+    public String getLetter() { return letter; }
+
+    
+    private static String calcLetter(double avg) {
+        if (avg >= 90) return "AA";
+        if (avg >= 85) return "BA";
+        if (avg >= 80) return "BB";
+        if (avg >= 75) return "CB";
+        if (avg >= 70) return "CC";
+        if (avg >= 65) return "DC";
+        if (avg >= 60) return "DD";
+        return "FF";
+    }
+
+    public static void addGradeDB(int studentId, int courseId,
+                                  double midterm, double fin) {
+
+        double avg = midterm * 0.4 + fin * 0.6;
+        String letter = calcLetter(avg);
+
+        String sql = """
+INSERT INTO grades(std_id, course_id, midterm, final_exam, average, letter)
+VALUES (?,?,?,?,?,?)
+""";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, studentId);
+            ps.setInt(2, courseId);
+            ps.setDouble(3, midterm);
+            ps.setDouble(4, fin);
+            ps.setDouble(5, avg);
+            ps.setString(6, letter);
+
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+  
+    public static List<Grades> getAllGradesDB() {
+        List<Grades> list = new ArrayList<>();
+        String sql = "SELECT * FROM grades";
+
+        try (Connection con = DBConnection.getConnection();
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+
+            while (rs.next()) {
+                list.add(new Grades(
+                        rs.getInt("grade_id"),
+                        rs.getInt("std_id"),
+                        rs.getInt("course_id"),
+                        rs.getDouble("midterm"),
+                        rs.getDouble("final_exam"),
+                        rs.getDouble("average"),
+                        rs.getString("letter")
+                ));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+  
+    public static void deleteGradeDB(int id) {
+        String sql = "DELETE FROM grades WHERE grade_id=?";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}

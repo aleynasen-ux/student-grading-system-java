@@ -1,0 +1,125 @@
+package studentgradingsystemaleyna;
+
+import java.io.*;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Department implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private int dept_id;
+    private String dept_name;
+
+    public Department(int dept_id, String dept_name) {
+        this.dept_id = dept_id;
+        this.dept_name = dept_name;
+    }
+
+
+    public int getDept_id() {
+        return dept_id;
+    }
+
+    public String getDept_name() {
+        return dept_name;
+    }
+
+    public void setDept_id(int dept_id) {
+        this.dept_id = dept_id;
+    }
+
+    public void setDept_name(String dept_name) {
+        this.dept_name = dept_name;
+    }
+
+   
+    private static List<Department> departmentList = new ArrayList<>();
+
+    public static void add_department(int id, String name) {
+        departmentList.add(new Department(id, name));
+    }
+
+    public static List<Department> getAllDepartments() {
+        return departmentList;
+    }
+
+  
+    private static final String URL =
+            "jdbc:mysql://localhost:3306/studentgrdsys?useSSL=false&serverTimezone=UTC";
+    private static final String USER = "root";
+    private static final String PASS = "";
+
+   
+    public static void add_department_db(String name) {
+
+        String sql = "INSERT INTO department(dept_name) VALUES(?)";
+
+        try (Connection con = DriverManager.getConnection(URL, USER, PASS);
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, name);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+public static void deleteDepartmentDB(int id) {
+    String sql = "DELETE FROM department WHERE dept_id=?";
+
+    try (Connection con = DriverManager.getConnection(URL, USER, PASS);
+         PreparedStatement ps = con.prepareStatement(sql)) {
+
+        ps.setInt(1, id);
+        ps.executeUpdate();
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+
+
+public static void restore_departments() {
+    try {
+        FileInputStream fis = new FileInputStream("departments.dat");
+        ObjectInputStream ois = new ObjectInputStream(fis);
+        departmentList = (List<Department>) ois.readObject();
+        ois.close();
+        fis.close();
+    } catch (IOException | ClassNotFoundException e) {
+        System.out.println("Error during restore_departments: " + e.getMessage());
+    }
+}
+
+    public static List<Department> getAllDepartmentsDB() {
+
+        List<Department> list = new ArrayList<>();
+        String sql = "SELECT * FROM department";
+
+        try (Connection con = DriverManager.getConnection(URL, USER, PASS);
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Department d = new Department(
+                        rs.getInt("dept_id"),
+                        rs.getString("dept_name")
+                );
+                list.add(d);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    @Override
+    public String toString() {
+        return "Department[ID=" + dept_id + ", Name=" + dept_name + "]";
+    }
+}

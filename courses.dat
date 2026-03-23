@@ -1,0 +1,132 @@
+package studentgradingsystemaleyna;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Student {
+
+   
+    private int std_id;
+    private String std_no;
+    private String std_name;
+    private String std_surname;
+    private char std_gender;
+    private String std_nationality;
+    private String std_birthdate;
+
+
+    public Student(int std_id, String std_no, String std_name,
+                   String std_surname, char std_gender,
+                   String std_nationality, String std_birthdate) {
+
+        this.std_id = std_id;
+        this.std_no = std_no;
+        this.std_name = std_name;
+        this.std_surname = std_surname;
+        this.std_gender = std_gender;
+        this.std_nationality = std_nationality;
+        this.std_birthdate = std_birthdate;
+    }
+
+
+    public int getStudentId() {
+        return std_id;
+    }
+
+    public String getStdNo() {
+        return std_no;
+    }
+
+    public String getFirstName() {
+        return std_name;
+    }
+
+    public String getLastName() {
+        return std_surname;
+    }
+
+    public char getGender() {
+        return std_gender;
+    }
+
+    public String getNationality() {
+        return std_nationality;
+    }
+
+    public String getBirthday() {
+        return std_birthdate;
+    }
+
+    public static void addStudentDB(
+            String stdNo,
+            String name,
+            String surname,
+            char gender,
+            String nationality,
+            String birthdate) {
+
+        String sql = """
+            INSERT INTO student
+            (std_no, std_name, std_surname, std_gender, std_nationality, std_birthdate)
+            VALUES (?,?,?,?,?,?)
+        """;
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, stdNo);
+            ps.setString(2, name);
+            ps.setString(3, surname);
+            ps.setString(4, String.valueOf(gender));
+            ps.setString(5, nationality);
+            ps.setString(6, birthdate);
+
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ===== SELECT =====
+    public static List<Student> getAllStudentsDB() {
+        List<Student> list = new ArrayList<>();
+        String sql = "SELECT * FROM student";
+
+        try (Connection con = DBConnection.getConnection();
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+
+            while (rs.next()) {
+                list.add(new Student(
+                        rs.getInt("std_id"),
+                        rs.getString("std_no"),
+                        rs.getString("std_name"),
+                        rs.getString("std_surname"),
+                        rs.getString("std_gender").charAt(0),
+                        rs.getString("std_nationality"),
+                        rs.getString("std_birthdate")
+                ));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // ===== DELETE =====
+    public static void deleteStudentDB(int id) {
+        String sql = "DELETE FROM student WHERE std_id=?";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
